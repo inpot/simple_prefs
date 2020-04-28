@@ -1,4 +1,5 @@
 library simple.prefs;
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -8,28 +9,34 @@ class SimplePref {
   Map<String, dynamic> content;
   File prefFile;
   static var _defaltEncoding = Encoding.getByName("utf-8");
-  static Map<String,SimplePref> _prefs = new Map();
+  static Map<String, SimplePref> _prefs = new Map();
 
   SimplePref(this.content, this.prefFile);
 
   static Future<SimplePref> getPref(String prefName) async {
     var result = _prefs[prefName];
-    if(result != null){
+    if (result != null) {
       return result;
     }
-    var prefDir = await getApplicationSupportDirectory();
-    var path = "${prefDir.path}${Platform.pathSeparator}$prefName.data";
-    var file = File(path);
+    Directory prefDir;
     Map<String, dynamic> content = Map();
-    if (!await file.exists()) {
-      await file.create(recursive: true);
-    } else {
-      var contentStr = await file.readAsString(encoding: _defaltEncoding);
-      if (contentStr.isNotEmpty) {
-        content = jsonDecode(contentStr);
+    File file;
+    try {
+      prefDir = await getApplicationSupportDirectory();
+      var path = "${prefDir.path}${Platform.pathSeparator}$prefName.data";
+      file = File(path);
+      if (!await file.exists()) {
+        await file.create(recursive: true);
+      } else {
+        var contentStr = await file.readAsString(encoding: _defaltEncoding);
+        if (contentStr.isNotEmpty) {
+          content = jsonDecode(contentStr);
+        }
       }
+    } catch (e) {
+      print("getPrefs Exception ${e.toString()}");
     }
-    result = SimplePref(content,file);
+    result = SimplePref(content, file);
     _prefs[prefName] = result;
     return result;
   }
@@ -50,11 +57,12 @@ class SimplePref {
   }
 
   void _save() async {
-  //  Map<String, dynamic> jsonData = {"name":"vishwajit"};
-//print(JsonEncoder().convert(jsonData));
-    var str = jsonEncode( content); 
-    print(str); 
-     await prefFile.writeAsString(str);
+    if (prefFile == null) {
+      return;
+    }
+    var str = jsonEncode(content);
+    print(str);
+    await prefFile.writeAsString(str);
   }
 
   int getInt(String key, int defaultValue) {
@@ -70,6 +78,13 @@ class SimplePref {
       return content[key];
     } else {
       return defaultValue;
+    }
+  }
+
+  void clear() {
+    content.clear();
+    if (prefFile != null) {
+      prefFile.delete();
     }
   }
 

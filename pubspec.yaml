@@ -1,5 +1,5 @@
 name: simple_prefs
-description: A new Flutter package project.
+description: A new Flutter package project. This support android, iOS,and desktop.
 version: 0.0.1
 author: winepot2005@gmail.com
 homepage: https://github.com/inpot/simple_prefs
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  path_provider: ^1.6.5
+  path_provider: ^1.6.7
   path_provider_fde:
     git:
       url: git://github.com/google/flutter-desktop-embedding.git
